@@ -14,6 +14,11 @@
 
 #include <stdint.h>
 
-void vBluetoothInit();
+#define BLUETOOTH_GATT_SCANNER          0
+#define BLUETOOTH_GATT_ADVERTISER       1
+#define BLUETOOTH_GATT_DUAL             2
+
+void vBluetoothInit(uint8_t bluetooth_mode);
+void vBluetoothDeInit();
 
 #endif

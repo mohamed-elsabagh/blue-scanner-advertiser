@@ -9,6 +9,7 @@
 * - Last changed:		2017-12-24
 *
 **********************************************************************/
+#include "AppConfig.h"
 #include "blue_gatts.h"
 
 #define GATTS_TAG "GATTS_DEMO"
@@ -486,4 +487,9 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
             }
         }
     } while (0);
+}
+
+void vSetAdvData(uint8_t * _data)
+{
+    memcpy(raw_adv_data, (const void *)_data, BLE_BUFFER_SIZE);
 }

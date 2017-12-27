@@ -11,6 +11,7 @@
 **********************************************************************/
 #include "bluetooth_application.h"
 #include "bluetooth_driver.h"
+#include "AppConfig.h"
 
 /**
   * @brief  FreeRTOS task for handling bluetooth.
@@ -21,14 +22,14 @@ void vBluetoothTask(void *arg)
 {
 	for(;;)
 	{
-        // Intializing bluetooth in dual mode for 60 seconds
-        vBluetoothInit(BLUETOOTH_GATT_DUAL);
+		vSetTxPower(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P7);
 
-        vTaskDelay( 60000 / portTICK_RATE_MS );
+		uint8_t raw_adv_data[] = {
+		        0x02, 0x02, 0x02,
+		        0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
+		};
 
-        vBluetoothDeInit();
-
-        vTaskDelay( 10000 / portTICK_RATE_MS );
+		vSetAdvDataDriver(raw_adv_data);
 
         // Intializing bluetooth in advertiser mode for 60 seconds
         vBluetoothInit(BLUETOOTH_GATT_ADVERTISER);

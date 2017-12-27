@@ -39,4 +39,8 @@
 #define  osPriorityHigh             configMAX_PRIORITIES - 1
 #define  osPriorityRealtime         configMAX_PRIORITIES - 0
 
+#define CONFIG_SET_RAW_ADV_DATA         1
+
+#define	BLE_BUFFER_SIZE			        10
+
 #endif

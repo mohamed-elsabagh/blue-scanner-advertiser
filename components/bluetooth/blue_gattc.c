@@ -312,7 +312,7 @@ void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
                 uint8_t id_found = 0;
                 ESP_LOGI(GATTC_TAG, "printing raw data\n");
                 for (i = 0 ; i < scan_result->scan_rst.adv_data_len; i++) {
-                    ESP_LOGI(GATTC_TAG, "%02X", scan_result->scan_rst.ble_adv[i]);
+                    // ESP_LOGI(GATTC_TAG, "%02X", scan_result->scan_rst.ble_adv[i]);
                     if (scan_result->scan_rst.ble_adv[i] == MANUFACTURER_BYTE2 &&
                          scan_result->scan_rst.ble_adv[i + 1] == MANUFACTURER_BYTE1) {
                              id_found = 1;

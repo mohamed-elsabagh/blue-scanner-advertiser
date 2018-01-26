@@ -24,6 +24,9 @@ static esp_gattc_descr_elem_t *descr_elem_result = NULL;
 
 #define RSSI_THRESHOLD -70
 
+#define MANUFACTURER_BYTE1      0xBE
+#define MANUFACTURER_BYTE2      0xEF
+
 struct gattc_profile_inst {
     esp_gattc_cb_t gattc_cb;
     uint16_t gattc_if;
@@ -305,32 +308,50 @@ void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
             rssi = scan_result->scan_rst.rssi;
             if (rssi > RSSI_THRESHOLD)
             {
-                ESP_LOGI(GATTC_TAG, "RSSI = %d", rssi);
-                esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
-                ESP_LOGI(GATTC_TAG, "searched Adv Data Len %d, Scan Response Len %d", scan_result->scan_rst.adv_data_len, scan_result->scan_rst.scan_rsp_len);
-                adv_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv,
-                                                    ESP_BLE_AD_TYPE_NAME_CMPL, &adv_name_len);
-                ESP_LOGI(GATTC_TAG, "searched Device Name Len %d", adv_name_len);
-                esp_log_buffer_char(GATTC_TAG, adv_name, adv_name_len);
-                ESP_LOGI(GATTC_TAG, "\n");
+                uint8_t i = 0;
+                uint8_t id_found = 0;
+                ESP_LOGI(GATTC_TAG, "printing raw data\n");
+                for (i = 0 ; i < scan_result->scan_rst.adv_data_len; i++) {
+                    ESP_LOGI(GATTC_TAG, "%02X", scan_result->scan_rst.ble_adv[i]);
+                    if (scan_result->scan_rst.ble_adv[i] == MANUFACTURER_BYTE2 &&
+                         scan_result->scan_rst.ble_adv[i + 1] == MANUFACTURER_BYTE1) {
+                             id_found = 1;
+                    }
+                }
 
-                /****************************************************/
-                ESP_LOGI(GATTC_TAG, "============ NEAREST TAG ============");
-                esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
-                ESP_LOGI(GATTC_TAG, "RSSI : %d", rssi);
-                ESP_LOGI(GATTC_TAG, " ");
-                /****************************************************/
+                if (id_found) {
+                    ESP_LOGI(GATTC_TAG, "RSSI = %d", rssi);
+                    esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
+                    ESP_LOGI(GATTC_TAG, "searched Adv Data Len %d, Scan Response Len %d", scan_result->scan_rst.adv_data_len, scan_result->scan_rst.scan_rsp_len);
+                    adv_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv,
+                                                        ESP_BLE_AD_TYPE_NAME_CMPL, &adv_name_len);
+                    ESP_LOGI(GATTC_TAG, "searched Device Name Len %d", adv_name_len);
+                    esp_log_buffer_char(GATTC_TAG, adv_name, adv_name_len);
+                    ESP_LOGI(GATTC_TAG, "\n");
 
-                if (adv_name != NULL) {
-                    if (strlen(remote_device_name) == adv_name_len && strncmp((char *)adv_name, remote_device_name, adv_name_len) == 0) {
-                        ESP_LOGI(GATTC_TAG, "searched device %s\n", remote_device_name);
-                        if (connect == false) {
-                            connect = true;
-                            ESP_LOGI(GATTC_TAG, "connect to the remote device.");
-                            esp_ble_gap_stop_scanning();
-                            esp_ble_gattc_open(gl_profile_tab[PROFILE_A_APP_ID_CLIENT].gattc_if, scan_result->scan_rst.bda, true);
+                    esp_log_buffer_char(GATTC_TAG, adv_name, adv_name_len);
+                    ESP_LOGI(GATTC_TAG, "\n");
+
+                    /****************************************************/
+                    ESP_LOGI(GATTC_TAG, "============ NEAREST TAG ============");
+                    esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
+                    ESP_LOGI(GATTC_TAG, "RSSI : %d", rssi);
+                    ESP_LOGI(GATTC_TAG, " ");
+                    /****************************************************/
+
+                    if (adv_name != NULL) {
+                        if (strlen(remote_device_name) == adv_name_len && strncmp((char *)adv_name, remote_device_name, adv_name_len) == 0) {
+                            ESP_LOGI(GATTC_TAG, "searched device %s\n", remote_device_name);
+                            if (connect == false) {
+                                connect = true;
+                                ESP_LOGI(GATTC_TAG, "connect to the remote device.");
+                                esp_ble_gap_stop_scanning();
+                                esp_ble_gattc_open(gl_profile_tab[PROFILE_A_APP_ID_CLIENT].gattc_if, scan_result->scan_rst.bda, true);
+                            }
                         }
                     }
+                } else {
+                    ESP_LOGI(GATTC_TAG, "The scanned beacons manufacturer id doesn't match the preassigned ID");
                 }
             }
             break;

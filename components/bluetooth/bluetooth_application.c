@@ -22,6 +22,15 @@ void vBluetoothTask(void *arg)
 {
 	for(;;)
 	{
+		// Intializing bluetooth in scanner mode for 60 seconds
+        vBluetoothInit(BLUETOOTH_GATT_SCANNER);
+
+        vTaskDelay( 60000 / portTICK_RATE_MS );
+
+        vBluetoothDeInit();
+
+        vTaskDelay( 10000 / portTICK_RATE_MS );
+
 		vSetTxPower(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P7);
 
 		uint8_t raw_adv_data[] = {
@@ -39,16 +48,6 @@ void vBluetoothTask(void *arg)
         vBluetoothDeInit();
 
         vTaskDelay( 10000 / portTICK_RATE_MS );
-
-        // Intializing bluetooth in scanner mode for 60 seconds
-        vBluetoothInit(BLUETOOTH_GATT_SCANNER);
-
-        vTaskDelay( 60000 / portTICK_RATE_MS );
-
-        vBluetoothDeInit();
-
-        vTaskDelay( 10000 / portTICK_RATE_MS );
-
 	}
 
 	vTaskDelete(NULL);
